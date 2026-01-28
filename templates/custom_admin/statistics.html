@@ -1,0 +1,216 @@
+{% extends 'custom_admin/admin_base.html' %}
+
+{% block title %}Статистика - Админ-панель{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Статистика платформы</h2>
+        <p class="text-muted">Аналитика и метрики использования</p>
+    </div>
+</div>
+
+<!-- Key Metrics -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-people text-primary fs-1 mb-2"></i>
+                <h6 class="text-muted">Всего пользователей</h6>
+                <h2>{{ total_users }}</h2>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-person-check text-success fs-1 mb-2"></i>
+                <h6 class="text-muted">Активные пользователи</h6>
+                <h2>{{ active_users }}</h2>
+                <small class="text-muted">за последнюю неделю</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-graph-up text-warning fs-1 mb-2"></i>
+                <h6 class="text-muted">Уровень вовлеченности</h6>
+                <h2>{{ engagement_rate }}%</h2>
+                <small class="text-muted">активных/всего</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Регистрации пользователей (последние 30 дней)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="userRegistrationsChart" height="60"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Записи о питании (последние 30 дней)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="foodLogsChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Записи об активности (последние 30 дней)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="activityLogsChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Usage Statistics Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Сводная статистика</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Метрика</th>
+                                <th>Значение</th>
+                                <th>Описание</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Всего пользователей</strong></td>
+                                <td>{{ total_users }}</td>
+                                <td>Общее количество зарегистрированных пользователей</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Активные пользователи</strong></td>
+                                <td>{{ active_users }}</td>
+                                <td>Пользователи с активностью за последнюю неделю</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Уровень вовлеченности</strong></td>
+                                <td>{{ engagement_rate }}%</td>
+                                <td>Процент активных пользователей от общего числа</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// User Registrations Chart
+const userRegData = {{ user_registrations|safe }};
+const userRegCtx = document.getElementById('userRegistrationsChart').getContext('2d');
+
+new Chart(userRegCtx, {
+    type: 'bar',
+    data: {
+        labels: userRegData.map(d => new Date(d.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })),
+        datasets: [{
+            label: 'Регистрации',
+            data: userRegData.map(d => d.count),
+            backgroundColor: 'rgba(13, 110, 253, 0.5)',
+            borderColor: '#0d6efd',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+
+// Food Logs Chart
+const foodLogsData = {{ food_logs_per_day|safe }};
+const foodLogsCtx = document.getElementById('foodLogsChart').getContext('2d');
+
+new Chart(foodLogsCtx, {
+    type: 'line',
+    data: {
+        labels: foodLogsData.map(d => new Date(d.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })),
+        datasets: [{
+            label: 'Записи о питании',
+            data: foodLogsData.map(d => d.count),
+            borderColor: '#198754',
+            backgroundColor: 'rgba(25, 135, 84, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Activity Logs Chart
+const activityLogsData = {{ activity_logs_per_day|safe }};
+const activityLogsCtx = document.getElementById('activityLogsChart').getContext('2d');
+
+new Chart(activityLogsCtx, {
+    type: 'line',
+    data: {
+        labels: activityLogsData.map(d => new Date(d.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })),
+        datasets: [{
+            label: 'Записи об активности',
+            data: activityLogsData.map(d => d.count),
+            borderColor: '#fd7e14',
+            backgroundColor: 'rgba(253, 126, 20, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Ежедневные показатели - FitTracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header bg-white">
+                <h4 class="mb-0">Ежедневные показатели</h4>
+                <p class="mb-0 text-muted">{{ today|date:"d F Y" }}</p>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.date.id_for_label }}" class="form-label">Дата</label>
+                        {{ form.date }}
+                        {% if form.date.errors %}
+                        <div class="invalid-feedback d-block">{{ form.date.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.weight.id_for_label }}" class="form-label">Вес (кг)</label>
+                            {{ form.weight }}
+                            {% if form.weight.errors %}
+                            <div class="invalid-feedback d-block">{{ form.weight.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.sleep_hours.id_for_label }}" class="form-label">Часы сна</label>
+                            {{ form.sleep_hours }}
+                            {% if form.sleep_hours.errors %}
+                            <div class="invalid-feedback d-block">{{ form.sleep_hours.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.mood.id_for_label }}" class="form-label">Настроение</label>
+                            {{ form.mood }}
+                            {% if form.mood.errors %}
+                            <div class="invalid-feedback d-block">{{ form.mood.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.energy_level.id_for_label }}" class="form-label">Уровень энергии</label>
+                            {{ form.energy_level }}
+                            {% if form.energy_level.errors %}
+                            <div class="invalid-feedback d-block">{{ form.energy_level.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.water_intake.id_for_label }}" class="form-label">Потребление воды (литры)</label>
+                        {{ form.water_intake }}
+                        {% if form.water_intake.errors %}
+                        <div class="invalid-feedback d-block">{{ form.water_intake.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label">Заметки о дне</label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                        <div class="invalid-feedback d-block">{{ form.notes.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                        <a href="{% url 'tracking:dashboard' %}" class="btn btn-secondary">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

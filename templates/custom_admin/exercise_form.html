@@ -1,0 +1,118 @@
+{% extends 'custom_admin/admin_base.html' %}
+
+{% block title %}{{ action }} упражнение - Админ-панель{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'custom_admin:exercises_list' %}">Упражнения</a></li>
+            <li class="breadcrumb-item active">{{ action }}</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h4 class="mb-0">{{ action }} упражнение</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">Название</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <div class="invalid-feedback d-block">{{ form.name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.category.id_for_label }}" class="form-label">Категория</label>
+                            {{ form.category }}
+                            {% if form.category.errors %}
+                            <div class="invalid-feedback d-block">{{ form.category.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.difficulty.id_for_label }}" class="form-label">Сложность</label>
+                            {{ form.difficulty }}
+                            {% if form.difficulty.errors %}
+                            <div class="invalid-feedback d-block">{{ form.difficulty.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.calories_per_minute.id_for_label }}" class="form-label">Калорий в минуту</label>
+                            {{ form.calories_per_minute }}
+                            {% if form.calories_per_minute.errors %}
+                            <div class="invalid-feedback d-block">{{ form.calories_per_minute.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">Описание</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                        <div class="invalid-feedback d-block">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.instructions.id_for_label }}" class="form-label">Инструкции</label>
+                        {{ form.instructions }}
+                        {% if form.instructions.errors %}
+                        <div class="invalid-feedback d-block">{{ form.instructions.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.target_muscles.id_for_label }}" class="form-label">Целевые мышцы</label>
+                            {{ form.target_muscles }}
+                            {% if form.target_muscles.errors %}
+                            <div class="invalid-feedback d-block">{{ form.target_muscles.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.equipment_needed.id_for_label }}" class="form-label">Необходимое оборудование</label>
+                            {{ form.equipment_needed }}
+                            {% if form.equipment_needed.errors %}
+                            <div class="invalid-feedback d-block">{{ form.equipment_needed.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.image.id_for_label }}" class="form-label">Изображение</label>
+                        {{ form.image }}
+                        {% if form.image.errors %}
+                        <div class="invalid-feedback d-block">{{ form.image.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.video_url.id_for_label }}" class="form-label">Ссылка на видео</label>
+                        {{ form.video_url }}
+                        {% if form.video_url.errors %}
+                        <div class="invalid-feedback d-block">{{ form.video_url.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                        <a href="{% url 'custom_admin:exercises_list' %}" class="btn btn-secondary">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

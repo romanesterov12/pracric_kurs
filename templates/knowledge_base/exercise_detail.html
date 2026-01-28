@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exercise.name }} - FitTracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'knowledge_base:exercises_list' %}">Упражнения</a></li>
+                <li class="breadcrumb-item active">{{ exercise.name }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            {% if exercise.image %}
+            <img src="{{ exercise.image.url }}" class="card-img-top" alt="{{ exercise.name }}" style="max-height: 400px; object-fit: cover;">
+            {% endif %}
+            <div class="card-body">
+                <h2 class="card-title">{{ exercise.name }}</h2>
+                <div class="mb-3">
+                    <span class="badge bg-primary me-2">{{ exercise.get_category_display }}</span>
+                    <span class="badge bg-secondary me-2">{{ exercise.get_difficulty_display }}</span>
+                    <span class="badge bg-danger">
+                        <i class="bi bi-fire"></i> {{ exercise.calories_per_minute }} ккал/мин
+                    </span>
+                </div>
+                
+                <h5 class="mt-4">Описание</h5>
+                <p>{{ exercise.description }}</p>
+                
+                <h5 class="mt-4">Инструкции</h5>
+                <p style="white-space: pre-line;">{{ exercise.instructions }}</p>
+                
+                <h5 class="mt-4">Целевые мышцы</h5>
+                <p>{{ exercise.target_muscles }}</p>
+                
+                {% if exercise.equipment_needed %}
+                <h5 class="mt-4">Необходимое оборудование</h5>
+                <p>{{ exercise.equipment_needed }}</p>
+                {% endif %}
+                
+                {% if exercise.video_url %}
+                <h5 class="mt-4">Видео</h5>
+                <a href="{{ exercise.video_url }}" target="_blank" class="btn btn-outline-primary">
+                    <i class="bi bi-play-circle"></i> Посмотреть видео
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Быстрое добавление</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">Добавьте это упражнение в журнал активности</p>
+                <a href="{% url 'tracking:activity_log_create' %}?name={{ exercise.name }}" class="btn btn-primary w-100">
+                    <i class="bi bi-plus-circle"></i> Добавить в журнал
+                </a>
+            </div>
+        </div>
+        
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Информация</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted">Категория</small>
+                    <div>{{ exercise.get_category_display }}</div>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted">Уровень сложности</small>
+                    <div>{{ exercise.get_difficulty_display }}</div>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted">Калории за минуту</small>
+                    <div>{{ exercise.calories_per_minute }} ккал</div>
+                </div>
+                <div>
+                    <small class="text-muted">Добавлено</small>
+                    <div>{{ exercise.created_at|date:"d.m.Y" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} активность - FitTracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header bg-white">
+                <h4 class="mb-0">{{ action }} активность</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.date.id_for_label }}" class="form-label">Дата</label>
+                            {{ form.date }}
+                            {% if form.date.errors %}
+                            <div class="invalid-feedback d-block">{{ form.date.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.activity_type.id_for_label }}" class="form-label">Тип активности</label>
+                            {{ form.activity_type }}
+                            {% if form.activity_type.errors %}
+                            <div class="invalid-feedback d-block">{{ form.activity_type.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.activity_name.id_for_label }}" class="form-label">Название активности</label>
+                        {{ form.activity_name }}
+                        {% if form.activity_name.errors %}
+                        <div class="invalid-feedback d-block">{{ form.activity_name.errors }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">Можно найти в <a href="{% url 'knowledge_base:exercises_list' %}" target="_blank">базе упражнений</a></small>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.duration_minutes.id_for_label }}" class="form-label">Длительность (минуты)</label>
+                            {{ form.duration_minutes }}
+                            {% if form.duration_minutes.errors %}
+                            <div class="invalid-feedback d-block">{{ form.duration_minutes.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.intensity.id_for_label }}" class="form-label">Интенсивность</label>
+                            {{ form.intensity }}
+                            {% if form.intensity.errors %}
+                            <div class="invalid-feedback d-block">{{ form.intensity.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.calories_burned.id_for_label }}" class="form-label">Калории сожжено</label>
+                            {{ form.calories_burned }}
+                            {% if form.calories_burned.errors %}
+                            <div class="invalid-feedback d-block">{{ form.calories_burned.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label">Заметки</label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                        <div class="invalid-feedback d-block">{{ form.notes.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                        <a href="{% url 'tracking:activity_log_list' %}" class="btn btn-secondary">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Удаление записи - FitTracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">Подтверждение удаления</h4>
+            </div>
+            <div class="card-body">
+                <p>Вы уверены, что хотите удалить эту запись о питании?</p>
+                
+                <div class="alert alert-warning">
+                    <strong>{{ food_log.food_name }}</strong><br>
+                    Дата: {{ food_log.date|date:"d.m.Y" }}<br>
+                    Прием пищи: {{ food_log.get_meal_type_display }}<br>
+                    Калории: {{ food_log.calories }} ккал
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">Да, удалить</button>
+                        <a href="{% url 'tracking:food_log_list' %}" class="btn btn-secondary">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

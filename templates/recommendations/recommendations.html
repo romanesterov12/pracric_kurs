@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Рекомендации - FitTracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Персональные рекомендации</h2>
+        <p class="text-muted">Рекомендации на сегодня: {{ today|date:"d F Y" }}</p>
+    </div>
+</div>
+
+{% if grouped_recommendations %}
+    {% for category, recommendations in grouped_recommendations.items %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">
+                {% if category == 'Питание' %}
+                <i class="bi bi-egg-fried text-primary"></i>
+                {% elif category == 'Тренировки' %}
+                <i class="bi bi-person-walking text-success"></i>
+                {% elif category == 'Образ жизни' %}
+                <i class="bi bi-brightness-high text-warning"></i>
+                {% else %}
+                <i class="bi bi-heart text-danger"></i>
+                {% endif %}
+                {{ category }}
+            </h5>
+        </div>
+        <div class="card-body">
+            {% for rec in recommendations %}
+            <div class="card mb-3 {% if rec.is_read %}bg-light{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h6 class="card-title">
+                                {% if rec.priority >= 9 %}
+                                <span class="badge bg-danger me-2">Важно</span>
+                                {% elif rec.priority >= 7 %}
+                                <span class="badge bg-warning me-2">Средний приоритет</span>
+                                {% endif %}
+                                {{ rec.title }}
+                            </h6>
+                            <p class="card-text">{{ rec.content }}</p>
+                        </div>
+                        {% if not rec.is_read %}
+                        <form method="post" action="{% url 'recommendations:mark_read' rec.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-check"></i> Отметить
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="badge bg-success"><i class="bi bi-check-circle"></i> Прочитано</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> На сегодня рекомендаций пока нет. Заполните свой профиль и добавьте данные о питании и активности, чтобы получить персонализированные рекомендации.
+</div>
+{% endif %}
+{% endblock %}

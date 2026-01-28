@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Упражнения - FitTracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>База упражнений</h2>
+        <p class="text-muted">Найдите подходящие упражнения для своих тренировок</p>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Поиск упражнений..." value="{{ search_query }}">
+            </div>
+            <div class="col-md-3">
+                <select name="category" class="form-select">
+                    <option value="">Все категории</option>
+                    {% for value, label in category_choices %}
+                    <option value="{{ value }}" {% if category == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="difficulty" class="form-select">
+                    <option value="">Все уровни сложности</option>
+                    {% for value, label in difficulty_choices %}
+                    <option value="{{ value }}" {% if difficulty == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Поиск
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Exercises Grid -->
+{% if page_obj %}
+<div class="row g-4 mb-4">
+    {% for exercise in page_obj %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm">
+            {% if exercise.image %}
+            <img src="{{ exercise.image.url }}" class="card-img-top" alt="{{ exercise.name }}" style="height: 200px; object-fit: cover;">
+            {% else %}
+            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ exercise.name }}</h5>
+                <p class="card-text text-muted small">{{ exercise.description|truncatewords:20 }}</p>
+                <div class="mb-2">
+                    <span class="badge bg-primary">{{ exercise.get_category_display }}</span>
+                    <span class="badge bg-secondary">{{ exercise.get_difficulty_display }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        <i class="bi bi-fire"></i> {{ exercise.calories_per_minute }} ккал/мин
+                    </small>
+                    <a href="{% url 'knowledge_base:exercise_detail' exercise.pk %}" class="btn btn-sm btn-outline-primary">
+                        Подробнее <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav>
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if difficulty %}&difficulty={{ difficulty }}{% endif %}">Первая</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if difficulty %}&difficulty={{ difficulty }}{% endif %}">Назад</a>
+        </li>
+        {% endif %}
+        
+        <li class="page-item active">
+            <span class="page-link">{{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+        </li>
+        
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if difficulty %}&difficulty={{ difficulty }}{% endif %}">Вперед</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if difficulty %}&difficulty={{ difficulty }}{% endif %}">Последняя</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> Упражнения не найдены. Попробуйте изменить параметры поиска.
+</div>
+{% endif %}
+{% endblock %}

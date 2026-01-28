@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная - FitTracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Добро пожаловать, {{ user.first_name|default:user.username }}!</h2>
+        <p class="text-muted">Сегодня: {{ today|date:"d F Y" }}</p>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'tracking:daily_tracking' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Добавить показатели дня
+        </a>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="text-muted mb-0">Калории съедено</h6>
+                    <i class="bi bi-egg-fried text-primary fs-4"></i>
+                </div>
+                <h3 class="mb-0">{{ total_calories_consumed }}</h3>
+                <small class="text-muted">из {{ calorie_target }} ккал</small>
+                <div class="progress mt-2" style="height: 6px;">
+                    <div class="progress-bar bg-primary" style="width: {{ calorie_progress }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="text-muted mb-0">Калории сожжено</h6>
+                    <i class="bi bi-fire text-danger fs-4"></i>
+                </div>
+                <h3 class="mb-0">{{ total_calories_burned }}</h3>
+                <small class="text-muted">ккал</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="text-muted mb-0">Белки</h6>
+                    <i class="bi bi-egg text-warning fs-4"></i>
+                </div>
+                <h3 class="mb-0">{{ total_protein|floatformat:0 }}</h3>
+                <small class="text-muted">г</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="text-muted mb-0">Чистые калории</h6>
+                    <i class="bi bi-calculator text-success fs-4"></i>
+                </div>
+                <h3 class="mb-0">{{ net_calories }}</h3>
+                <small class="text-muted">ккал</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">График веса за последнюю неделю</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="weightChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Сегодняшние показатели</h5>
+            </div>
+            <div class="card-body">
+                {% if daily_metrics %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Вес</span>
+                        <strong>{{ daily_metrics.weight|default:"—" }} кг</strong>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Сон</span>
+                        <strong>{{ daily_metrics.sleep_hours|default:"—" }} ч</strong>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Настроение</span>
+                        <strong>{{ daily_metrics.get_mood_display|default:"—" }}</strong>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Энергия</span>
+                        <strong>{{ daily_metrics.get_energy_level_display|default:"—" }}</strong>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Вода</span>
+                        <strong>{{ daily_metrics.water_intake|default:"—" }} л</strong>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted text-center my-4">Показатели не внесены</p>
+                <a href="{% url 'tracking:daily_tracking' %}" class="btn btn-primary w-100">Добавить показатели</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Сегодняшнее питание</h5>
+                <a href="{% url 'tracking:food_log_create' %}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus"></i> Добавить
+                </a>
+            </div>
+            <div class="card-body">
+                {% if food_logs %}
+                <div class="list-group list-group-flush">
+                    {% for log in food_logs %}
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="mb-1">{{ log.food_name }}</h6>
+                                <small class="text-muted">{{ log.get_meal_type_display }} • {{ log.portion_size }}г</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">{{ log.calories }} ккал</div>
+                                <small class="text-muted">Б: {{ log.protein|floatformat:0 }}г У: {{ log.carbs|floatformat:0 }}г Ж: {{ log.fats|floatformat:0 }}г</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <a href="{% url 'tracking:food_log_list' %}" class="btn btn-link mt-2">Посмотреть все</a>
+                {% else %}
+                <p class="text-muted text-center my-4">Пока нет записей о питании</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Сегодняшняя активность</h5>
+                <a href="{% url 'tracking:activity_log_create' %}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus"></i> Добавить
+                </a>
+            </div>
+            <div class="card-body">
+                {% if activity_logs %}
+                <div class="list-group list-group-flush">
+                    {% for log in activity_logs %}
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="mb-1">{{ log.activity_name }}</h6>
+                                <small class="text-muted">{{ log.get_activity_type_display }} • {{ log.get_intensity_display }}</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">{{ log.calories_burned }} ккал</div>
+                                <small class="text-muted">{{ log.duration_minutes }} мин</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <a href="{% url 'tracking:activity_log_list' %}" class="btn btn-link mt-2">Посмотреть все</a>
+                {% else %}
+                <p class="text-muted text-center my-4">Пока нет записей об активности</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Weight chart
+const weightData = {{ weight_data|safe }};
+const ctx = document.getElementById('weightChart').getContext('2d');
+
+const labels = weightData.map(item => {
+    const date = new Date(item.date);
+    return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+});
+
+const weights = weightData.map(item => item.weight);
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Вес (кг)',
+            data: weights,
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: false
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

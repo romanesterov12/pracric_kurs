@@ -1,0 +1,173 @@
+{% extends 'custom_admin/admin_base.html' %}
+
+{% block title %}Админ-панель - FitTracker{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Обзор платформы</h2>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="text-muted mb-0">Всего пользователей</h6>
+                    <i class="bi bi-people text-primary fs-3"></i>
+                </div>
+                <h2 class="mb-0">{{ total_users }}</h2>
+                <small class="text-success">
+                    <i class="bi bi-arrow-up"></i> +{{ new_users_week }} за неделю
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="text-muted mb-0">Активные пользователи</h6>
+                    <i class="bi bi-person-check text-success fs-3"></i>
+                </div>
+                <h2 class="mb-0">{{ active_users_week }}</h2>
+                <small class="text-muted">за последнюю неделю</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="text-muted mb-0">Упражнений в базе</h6>
+                    <i class="bi bi-person-walking text-warning fs-3"></i>
+                </div>
+                <h2 class="mb-0">{{ total_exercises }}</h2>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="text-muted mb-0">Продуктов в базе</h6>
+                    <i class="bi bi-egg-fried text-danger fs-3"></i>
+                </div>
+                <h2 class="mb-0">{{ total_foods }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Statistics -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Записей о питании</h6>
+                <h3>{{ total_food_logs }}</h3>
+                <small class="text-muted">за последний месяц</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Записей об активности</h6>
+                <h3>{{ total_activity_logs }}</h3>
+                <small class="text-muted">за последний месяц</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Рекомендаций создано</h6>
+                <h3>{{ total_recommendations }}</h3>
+                <small class="text-muted">за последний месяц</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Popular Content -->
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Популярные упражнения</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    {% for exercise in popular_exercises %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <div>
+                            <h6 class="mb-0">{{ exercise.name }}</h6>
+                            <small class="text-muted">{{ exercise.get_category_display }}</small>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">{{ exercise.usage_count|default:0 }}</span>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center my-3">Нет данных</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Последние продукты</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    {% for food in popular_foods %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <div>
+                            <h6 class="mb-0">{{ food.name }}</h6>
+                            <small class="text-muted">{{ food.get_category_display }} • {{ food.calories }} ккал</small>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center my-3">Нет данных</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Вовлеченность пользователей</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Среднее записей на пользователя</h6>
+                        <h3>{{ avg_logs_per_user }}</h3>
+                        <small class="text-muted">за месяц</small>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Всего статей</h6>
+                        <h3>{{ total_articles }}</h3>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Уровень активности</h6>
+                        <h3>{{ active_users_week }}/{{ total_users }}</h3>
+                        <small class="text-muted">активных/всего</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

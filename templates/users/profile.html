@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}Профиль - FitTracker{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow">
+            <div class="card-body text-center">
+                {% if user.avatar %}
+                <img src="{{ user.avatar.url }}" alt="Аватар" class="rounded-circle mb-3" width="150" height="150" style="object-fit: cover;">
+                {% else %}
+                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 150px; height: 150px; font-size: 4rem;">
+                    {{ user.username|slice:":1"|upper }}
+                </div>
+                {% endif %}
+                <h3 class="mb-1">{{ user.username }}</h3>
+                <p class="text-muted mb-3">{{ user.email }}</p>
+                <a href="{% url 'users:profile_edit' %}" class="btn btn-primary">
+                    <i class="bi bi-pencil"></i> Редактировать профиль
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Личная информация</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Имя:</div>
+                    <div class="col-sm-8">{{ user.first_name|default:"Не указано" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Фамилия:</div>
+                    <div class="col-sm-8">{{ user.last_name|default:"Не указано" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Телефон:</div>
+                    <div class="col-sm-8">{{ user.phone|default:"Не указан" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Дата рождения:</div>
+                    <div class="col-sm-8">{{ user.date_of_birth|date:"d.m.Y"|default:"Не указана" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Пол:</div>
+                    <div class="col-sm-8">{{ user.get_gender_display|default:"Не указан" }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 fw-bold">Дата регистрации:</div>
+                    <div class="col-sm-8">{{ user.created_at|date:"d.m.Y H:i" }}</div>
+                </div>
+            </div>
+        </div>
+        
+        {% if profile %}
+        <div class="card shadow">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Фитнес-профиль</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Рост:</div>
+                    <div class="col-sm-8">{{ profile.height }} см</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Текущий вес:</div>
+                    <div class="col-sm-8">{{ profile.current_weight }} кг</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Целевой вес:</div>
+                    <div class="col-sm-8">{{ profile.target_weight }} кг</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">ИМТ:</div>
+                    <div class="col-sm-8">
+                        {% if profile.bmi %}
+                        {{ profile.bmi }}
+                        {% if profile.bmi < 18.5 %}
+                        <span class="badge bg-info">Недостаточный вес</span>
+                        {% elif profile.bmi < 25 %}
+                        <span class="badge bg-success">Нормальный вес</span>
+                        {% elif profile.bmi < 30 %}
+                        <span class="badge bg-warning">Избыточный вес</span>
+                        {% else %}
+                        <span class="badge bg-danger">Ожирение</span>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Цель:</div>
+                    <div class="col-sm-8">{{ profile.get_goal_display }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Уровень активности:</div>
+                    <div class="col-sm-8">{{ profile.get_activity_level_display }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Целевая калорийность:</div>
+                    <div class="col-sm-8">{{ profile.daily_calories_target }} ккал/день</div>
+                </div>
+                {% if profile.medical_conditions %}
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Медицинские ограничения:</div>
+                    <div class="col-sm-8">{{ profile.medical_conditions }}</div>
+                </div>
+                {% endif %}
+                {% if profile.allergies %}
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Аллергии:</div>
+                    <div class="col-sm-8">{{ profile.allergies }}</div>
+                </div>
+                {% endif %}
+                {% if profile.dietary_preferences %}
+                <div class="row">
+                    <div class="col-sm-4 fw-bold">Пищевые предпочтения:</div>
+                    <div class="col-sm-8">{{ profile.dietary_preferences }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Заполните свой фитнес-профиль для получения персонализированных рекомендаций.
+            <a href="{% url 'users:profile_edit' %}" class="alert-link">Заполнить сейчас</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

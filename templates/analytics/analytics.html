@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+
+{% block title %}Аналитика - FitTracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Аналитика и статистика</h2>
+    </div>
+    <div class="col-auto">
+        <div class="btn-group">
+            <a href="{% url 'analytics:export_xlsx' %}?period={{ period }}" class="btn btn-success">
+                <i class="bi bi-file-earmark-excel"></i> Экспорт Excel
+            </a>
+            <a href="{% url 'analytics:export_pdf' %}?period={{ period }}" class="btn btn-danger">
+                <i class="bi bi-file-earmark-pdf"></i> Экспорт PDF
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Period Selection -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-center">
+            <div class="col-auto">
+                <label class="col-form-label">Период:</label>
+            </div>
+            <div class="col-auto">
+                <select name="period" class="form-select" onchange="this.form.submit()">
+                    <option value="7" {% if period == '7' %}selected{% endif %}>Последние 7 дней</option>
+                    <option value="14" {% if period == '14' %}selected{% endif %}>Последние 14 дней</option>
+                    <option value="30" {% if period == '30' %}selected{% endif %}>Последние 30 дней</option>
+                    <option value="60" {% if period == '60' %}selected{% endif %}>Последние 60 дней</option>
+                    <option value="90" {% if period == '90' %}selected{% endif %}>Последние 90 дней</option>
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-egg-fried text-primary fs-1 mb-2"></i>
+                <h6 class="text-muted">Средняя калорийность</h6>
+                <h3>{{ nutrition_summary.avg_calories|floatformat:0|default:"0" }}</h3>
+                <small class="text-muted">ккал/день</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-fire text-danger fs-1 mb-2"></i>
+                <h6 class="text-muted">Всего приемов пищи</h6>
+                <h3>{{ nutrition_summary.total_meals|default:"0" }}</h3>
+                <small class="text-muted">за период</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-person-walking text-success fs-1 mb-2"></i>
+                <h6 class="text-muted">Тренировок</h6>
+                <h3>{{ activity_summary|length|default:"0" }}</h3>
+                <small class="text-muted">за период</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-moon-stars text-info fs-1 mb-2"></i>
+                <h6 class="text-muted">Средний сон</h6>
+                <h3>{{ metrics_summary.avg_sleep|floatformat:1|default:"0" }}</h3>
+                <small class="text-muted">часов/день</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Калории: потребление и расход</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="caloriesChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Распределение по приемам пищи</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="mealDistributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Прогресс веса</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="weightProgressChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Среднее БЖУ</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="macrosChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Summary Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Сводка по типам активности</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Тип активности</th>
+                                <th>Количество тренировок</th>
+                                <th>Общая длительность</th>
+                                <th>Калории сожжено</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for activity in activity_summary %}
+                            <tr>
+                                <td>
+                                    {% if activity.activity_type == 'cardio' %}
+                                    <i class="bi bi-heart-pulse text-danger"></i> Кардио
+                                    {% elif activity.activity_type == 'strength' %}
+                                    <i class="bi bi-award text-warning"></i> Силовая
+                                    {% elif activity.activity_type == 'flexibility' %}
+                                    <i class="bi bi-person-arms-up text-info"></i> Растяжка
+                                    {% elif activity.activity_type == 'sports' %}
+                                    <i class="bi bi-trophy text-success"></i> Спорт
+                                    {% elif activity.activity_type == 'walking' %}
+                                    <i class="bi bi-person-walking text-primary"></i> Ходьба
+                                    {% else %}
+                                    <i class="bi bi-activity text-secondary"></i> Другое
+                                    {% endif %}
+                                </td>
+                                <td>{{ activity.count }}</td>
+                                <td>{{ activity.total_duration }} мин</td>
+                                <td>{{ activity.total_calories }} ккал</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">Нет данных об активности за этот период</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Calories Chart
+const caloriesData = {{ calories_data|safe }};
+const caloriesCtx = document.getElementById('caloriesChart').getContext('2d');
+
+new Chart(caloriesCtx, {
+    type: 'line',
+    data: {
+        labels: caloriesData.map(d => new Date(d.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })),
+        datasets: [{
+            label: 'Потреблено',
+            data: caloriesData.map(d => d.consumed),
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+            tension: 0.4,
+            fill: true
+        }, {
+            label: 'Сожжено',
+            data: caloriesData.map(d => d.burned),
+            borderColor: '#dc3545',
+            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        interaction: {
+            mode: 'index',
+            intersect: false
+        }
+    }
+});
+
+// Weight Progress Chart
+const weightData = {{ weight_data|safe }};
+const weightCtx = document.getElementById('weightProgressChart').getContext('2d');
+
+new Chart(weightCtx, {
+    type: 'line',
+    data: {
+        labels: weightData.map(d => new Date(d.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })),
+        datasets: [{
+            label: 'Вес (кг)',
+            data: weightData.map(d => d.weight),
+            borderColor: '#198754',
+            backgroundColor: 'rgba(25, 135, 84, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true
+    }
+});
+
+// Macros Chart
+const macrosCtx = document.getElementById('macrosChart').getContext('2d');
+new Chart(macrosCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Белки', 'Углеводы', 'Жиры'],
+        datasets: [{
+            data: [
+                {{ nutrition_summary.avg_protein|default:0 }},
+                {{ nutrition_summary.avg_carbs|default:0 }},
+                {{ nutrition_summary.avg_fats|default:0 }}
+            ],
+            backgroundColor: ['#ffc107', '#0dcaf0', '#dc3545']
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true
+    }
+});
+
+// Meal Distribution Chart
+const mealDistCtx = document.getElementById('mealDistributionChart').getContext('2d');
+new Chart(mealDistCtx, {
+    type: 'pie',
+    data: {
+        labels: [
+            {% for meal in meal_distribution %}
+            '{{ meal.get_meal_type_display|default:"Неизвестно" }}'{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for meal in meal_distribution %}
+                {{ meal.count }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545']
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true
+    }
+});
+</script>
+{% endblock %}

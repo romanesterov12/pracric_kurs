@@ -1,0 +1,167 @@
+{% extends 'custom_admin/admin_base.html' %}
+
+{% block title %}{{ user_obj.username }} - Админ-панель{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'custom_admin:users_list' %}">Пользователи</a></li>
+            <li class="breadcrumb-item active">{{ user_obj.username }}</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                {% if user_obj.avatar %}
+                <img src="{{ user_obj.avatar.url }}" alt="Аватар" class="rounded-circle mb-3" width="150" height="150" style="object-fit: cover;">
+                {% else %}
+                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 150px; height: 150px; font-size: 4rem;">
+                    {{ user_obj.username|slice:":1"|upper }}
+                </div>
+                {% endif %}
+                <h3 class="mb-1">{{ user_obj.username }}</h3>
+                <p class="text-muted mb-3">{{ user_obj.email }}</p>
+                {% if user_obj.is_staff %}
+                <span class="badge bg-danger mb-3">Администратор</span>
+                {% endif %}
+                {% if user_obj.is_active %}
+                <span class="badge bg-success">Активен</span>
+                {% else %}
+                <span class="badge bg-secondary">Неактивен</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Статистика активности</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Записей о питании</span>
+                        <strong>{{ total_food_logs }}</strong>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Записей об активности</span>
+                        <strong>{{ total_activity_logs }}</strong>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Дней отслежено</span>
+                        <strong>{{ total_days_tracked }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Информация о пользователе</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">ID:</div>
+                    <div class="col-sm-8">{{ user_obj.id }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Имя:</div>
+                    <div class="col-sm-8">{{ user_obj.first_name|default:"Не указано" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Фамилия:</div>
+                    <div class="col-sm-8">{{ user_obj.last_name|default:"Не указано" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Email:</div>
+                    <div class="col-sm-8">{{ user_obj.email }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Телефон:</div>
+                    <div class="col-sm-8">{{ user_obj.phone|default:"Не указан" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Дата рождения:</div>
+                    <div class="col-sm-8">{{ user_obj.date_of_birth|date:"d.m.Y"|default:"Не указана" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Пол:</div>
+                    <div class="col-sm-8">{{ user_obj.get_gender_display|default:"Не указан" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 fw-bold">Дата регистрации:</div>
+                    <div class="col-sm-8">{{ user_obj.created_at|date:"d.m.Y H:i" }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 fw-bold">Последнее обновление:</div>
+                    <div class="col-sm-8">{{ user_obj.updated_at|date:"d.m.Y H:i" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Последние записи о питании</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_food_logs %}
+                <div class="list-group list-group-flush">
+                    {% for log in recent_food_logs %}
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="mb-1">{{ log.food_name }}</h6>
+                                <small class="text-muted">{{ log.date|date:"d.m.Y" }} • {{ log.get_meal_type_display }}</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">{{ log.calories }} ккал</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center my-3">Нет записей</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Последние записи об активности</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_activity_logs %}
+                <div class="list-group list-group-flush">
+                    {% for log in recent_activity_logs %}
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="mb-1">{{ log.activity_name }}</h6>
+                                <small class="text-muted">{{ log.date|date:"d.m.Y" }} • {{ log.get_activity_type_display }}</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">{{ log.duration_minutes }} мин</div>
+                                <small class="text-muted">{{ log.calories_burned }} ккал</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center my-3">Нет записей</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

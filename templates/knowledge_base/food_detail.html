@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ food.name }} - FitTracker{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'knowledge_base:foods_list' %}">Продукты</a></li>
+                <li class="breadcrumb-item active">{{ food.name }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            {% if food.image %}
+            <img src="{{ food.image.url }}" class="card-img-top" alt="{{ food.name }}" style="max-height: 350px; object-fit: cover;">
+            {% endif %}
+            <div class="card-body">
+                <h2 class="card-title">{{ food.name }}</h2>
+                <span class="badge bg-info mb-3">{{ food.get_category_display }}</span>
+                
+                <h5 class="mt-4">Пищевая ценность (на 100г)</h5>
+                <div class="row text-center mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="text-muted">Калории</h6>
+                                <h3>{{ food.calories }}</h3>
+                                <small class="text-muted">ккал</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="text-muted">Белки</h6>
+                                <h3>{{ food.protein|floatformat:1 }}</h3>
+                                <small class="text-muted">г</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="text-muted">Углеводы</h6>
+                                <h3>{{ food.carbs|floatformat:1 }}</h3>
+                                <small class="text-muted">г</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="text-muted">Жиры</h6>
+                                <h3>{{ food.fats|floatformat:1 }}</h3>
+                                <small class="text-muted">г</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if food.fiber > 0 %}
+                <div class="mb-3">
+                    <strong>Клетчатка:</strong> {{ food.fiber|floatformat:1 }} г
+                </div>
+                {% endif %}
+                
+                {% if food.description %}
+                <h5 class="mt-4">Описание</h5>
+                <p>{{ food.description }}</p>
+                {% endif %}
+                
+                {% if food.health_benefits %}
+                <h5 class="mt-4">Польза для здоровья</h5>
+                <p>{{ food.health_benefits }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Калькулятор порции</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Размер порции (г)</label>
+                    <input type="number" class="form-control" id="portionSize" value="100" min="1">
+                </div>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Калории:</span>
+                            <strong><span id="calcCalories">{{ food.calories }}</span> ккал</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Белки:</span>
+                            <strong><span id="calcProtein">{{ food.protein|floatformat:1 }}</span> г</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Углеводы:</span>
+                            <strong><span id="calcCarbs">{{ food.carbs|floatformat:1 }}</span> г</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Жиры:</span>
+                            <strong><span id="calcFats">{{ food.fats|floatformat:1 }}</span> г</strong>
+                        </div>
+                    </div>
+                </div>
+                <a href="{% url 'tracking:food_log_create' %}?name={{ food.name }}" class="btn btn-primary w-100 mt-3">
+                    <i class="bi bi-plus-circle"></i> Добавить в журнал
+                </a>
+            </div>
+        </div>
+        
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Информация</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted">Категория</small>
+                    <div>{{ food.get_category_display }}</div>
+                </div>
+                <div>
+                    <small class="text-muted">Добавлено</small>
+                    <div>{{ food.created_at|date:"d.m.Y" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Portion calculator
+const baseCalories = {{ food.calories }};
+const baseProtein = {{ food.protein }};
+const baseCarbs = {{ food.carbs }};
+const baseFats = {{ food.fats }};
+
+document.getElementById('portionSize').addEventListener('input', function() {
+    const portion = parseFloat(this.value) || 0;
+    const multiplier = portion / 100;
+    
+    document.getElementById('calcCalories').textContent = Math.round(baseCalories * multiplier);
+    document.getElementById('calcProtein').textContent = (baseProtein * multiplier).toFixed(1);
+    document.getElementById('calcCarbs').textContent = (baseCarbs * multiplier).toFixed(1);
+    document.getElementById('calcFats').textContent = (baseFats * multiplier).toFixed(1);
+});
+</script>
+{% endblock %}
